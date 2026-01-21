@@ -33,21 +33,17 @@ def is_random_input(email):
 
     return False
 
-@app.route('/validate', methods=['POST'])
-def validate_email_address():
-    data = request.get_json()
-    if not data or 'email' not in data:
-        return jsonify({'error': 'Email address not provided'}), 400
-
-    email = data['email']
-
+def validate_single_email(email):
+    """
+    Validates a single email address and returns a dictionary with the results.
+    """
     # 1. Syntax Validation
     has_valid_syntax = validate_email(email, check_smtp=False, check_dns=False)
 
     is_random = is_random_input(email)
 
     if not has_valid_syntax:
-        return jsonify({
+        return {
             "MailboxValidation": {
                 "IsValid": {
                     "ConfidenceVerdict": "LOW"
@@ -79,7 +75,7 @@ def validate_email_address():
                     }
                 }
             }
-        })
+        }
 
     # 2. DNS Records
     has_valid_dns = validate_email(email, check_smtp=False, check_dns=True)
@@ -100,7 +96,7 @@ def validate_email_address():
     # Determine overall validity
     is_valid_confidence = "HIGH" if has_valid_syntax and has_valid_dns else "LOW"
 
-    return jsonify({
+    return {
         "MailboxValidation": {
             "IsValid": {
                 "ConfidenceVerdict": is_valid_confidence
@@ -132,7 +128,20 @@ def validate_email_address():
                 }
             }
         }
-    })
+    }
+
+@app.route('/validate', methods=['POST'])
+def validate_email_address():
+    data = request.get_json()
+    if not data or 'emails' not in data:
+        return jsonify({'error': '`emails` not provided'}), 400
+
+    emails = data['emails']
+    if not isinstance(emails, list) or not emails:
+        return jsonify({'error': '`emails` should be a non-empty list'}), 400
+
+    results = [validate_single_email(email) for email in emails]
+    return jsonify(results)
 
 if __name__ == '__main__':
     app.run(debug=True, port=5001)

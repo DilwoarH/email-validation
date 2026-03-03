@@ -2,6 +2,35 @@
 
 This is a simple Flask API for validating email addresses. It provides a single endpoint to validate one or more emails.
 
+## Getting Started
+
+### Prerequisites
+
+- Python 3.x
+- pip
+
+### Installation
+
+1. Clone the repository and navigate to the project directory.
+
+2. Install the dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+### Running the App
+
+Start the development server:
+
+```bash
+flask run
+```
+
+The API will be available at `http://127.0.0.1:5000`.
+
+---
+
 ## API Endpoint
 
 ### `POST /validate`
